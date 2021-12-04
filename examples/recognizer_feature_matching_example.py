@@ -109,8 +109,8 @@ def sift_orb_bounding_box():
 
 
 if __name__ == '__main__':
-    img_query = cv.imread("test/query_images/道具_带框_模组数据块.png", cv.IMREAD_COLOR)
-    img_scene = cv.imread("test/scene_images/screenshot_0_1x.jpg", cv.IMREAD_COLOR)
+    img_query = cv.imread("../test/query_images/道具_带框_模组数据块.png", cv.IMREAD_COLOR)
+    img_scene = cv.imread("../test/scene_images/screenshot_0_1x.jpg", cv.IMREAD_COLOR)
 
     img_matches = sift_orb_bounding_box()
     cv.imshow("matches", img_matches)

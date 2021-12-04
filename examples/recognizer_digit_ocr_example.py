@@ -136,7 +136,7 @@ if __name__ == '__main__':
     model = obtain_model()
     # test_img, out = test()
 
-    test_img = cv.imread("test/test_images/number_0.png")
+    test_img = cv.imread("../test/test_images/number_0.png")
     test_img = cv.cvtColor(test_img, cv.COLOR_RGB2GRAY)
     test_img = cv.GaussianBlur(test_img, (5, 5), 0)
     test_img = cv.adaptiveThreshold(test_img, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 11, 2)
