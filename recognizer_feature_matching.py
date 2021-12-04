@@ -1,11 +1,9 @@
-import numpy as np
-import cv2 as cv
-import matplotlib.pyplot as plt
-
-
 # References
 # Feature Detection: https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html
 # Draw Bounding Box: https://stackoverflow.com/questions/51606215/how-to-draw-bounding-box-on-best-matches
+
+import cv2 as cv
+import numpy as np
 
 
 def bf_orb_method():

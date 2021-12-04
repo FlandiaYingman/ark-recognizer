@@ -1,17 +1,17 @@
-import array
-import random
-from math import ceil
-
-import cv2.ml
-import numpy as np
-import cv2 as cv
-from PIL import Image, ImageDraw, ImageFont
-from cv2 import ml_KNearest
-from numpy import ndarray
-
 # References
 # Digit OCR Training: https://stackoverflow.com/questions/9413216/simple-digit-recognition-ocr-in-opencv-python
 # Draw Digit with Font: https://stackoverflow.com/questions/37191008/load-truetype-font-to-opencv
+
+import random
+from math import ceil
+
+import cv2 as cv
+import cv2.ml
+import numpy as np
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
+from cv2 import ml_KNearest
 
 FONT_HEIGHT = 28
 FONT_WIDTH = 15
