@@ -12,7 +12,8 @@ DIGIT_BORDER_RIGHT = 28 / 172  # =~16.28%
 class QueryItem:
 
     def __extract_alpha_mask(self):
-        return self.image[:, :, 3]
+        alpha = self.image[:, :, 3]
+        return alpha
 
     def __extract_item_number_mask(self):
         width, height = (self.image.shape[1], self.image.shape[0])
@@ -35,7 +36,7 @@ class QueryItem:
             cv.bitwise_and(
                 self.__extract_alpha_mask(),
                 self.__extract_item_number_mask()),
-            127, 1, cv.THRESH_BINARY
+            127, 255, cv.THRESH_BINARY
         )
         self.image = self.image[:, :, :3]
 

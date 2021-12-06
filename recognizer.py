@@ -12,7 +12,6 @@ from numpy import ndarray
 from recognizer_feature_matching import detect_features
 from recognizer_feature_matching import match_item
 from recognizer_feature_matching import preprocess_items_feature
-from recognizer_feature_matching import show_features
 from recognizer_item import DIGIT_BORDER_BOTTOM
 from recognizer_item import DIGIT_BORDER_LEFT
 from recognizer_item import DIGIT_BORDER_RIGHT
@@ -42,7 +41,6 @@ def match_items(scene_image):
     if len(ITEMS) == 0:
         raise RuntimeError("ITEMS hasn't been loaded, use load_items()")
     scene_keypoints, scene_descriptor = detect_features(scene_image)
-    show_features(scene_image, scene_keypoints)
     scales = []
     for item_id, item in ITEMS.items():
         item: QueryItem
@@ -52,11 +50,11 @@ def match_items(scene_image):
             cv.rectangle(scene_image_canvas, (x, y), (x + w, y + w), (0, 0, 255))
             match_box = scene_image[y:y + h, x:x + h]
             scales.append(scale)
-            # cv.imshow(None, match_box)
-            # cv.waitKey()
-    # cv.imshow(None, scene_image_canvas)
-    # cv.waitKey()
-    return np.array(scales)
+
+    scales = np.array(scales)
+    scales = scales[np.where(scales.mean() + scales.std() / 3 > scales)]
+    scales = scales[np.where(scales.mean() - scales.std() / 3 < scales)]
+    return scales.mean()
 
 
 def show_query_results(scene: ndarray, query_results: list[TMResult]):
@@ -69,25 +67,41 @@ def show_query_results(scene: ndarray, query_results: list[TMResult]):
     for tm_result in query_results:
         draw_pil.text(tm_result.loc, str(tm_result.item), font=font, fill=(255, 0, 0))
     scene_copy = np.array(image_pil)
-
-    cv.imshow("show_query_results", scene_copy)
-    cv.waitKey()
+    return scene_copy
 
 
-if __name__ == '__main__':
-    scene = cv.imread("test/scene_images/screenshot_1.jpg", cv.IMREAD_COLOR)
+def _main():
+    scene_0 = cv.imread("test/screenshots/0_1080.png", cv.IMREAD_COLOR)
+    scene_1 = cv.imread("test/screenshots/1_1080.png", cv.IMREAD_COLOR)
+    scene_2 = cv.imread("test/screenshots/2_1080.png", cv.IMREAD_COLOR)
+    scene_3 = cv.imread("test/screenshots/3_1080.png", cv.IMREAD_COLOR)
+
     load_items()
     preprocess_items_feature()
     preprocess_items_template()
 
+    result_scene_0 = recognize(scene_0)
+    result_scene_1 = recognize(scene_1)
+    result_scene_2 = recognize(scene_2)
+    result_scene_3 = recognize(scene_3)
+
+    cv.imshow("result_scene_0", result_scene_0)
+    cv.imshow("result_scene_1", result_scene_1)
+    cv.imshow("result_scene_2", result_scene_2)
+    cv.imshow("result_scene_3", result_scene_3)
+    cv.waitKey()
+
+
+def recognize(scene):
     start_time = timeit.default_timer()
-
-    scales = match_items(scene)
-    scale = scales.mean()
+    scale = match_items(scene)
     print("scale factor: %f" % scale)
-
     tm_results = query_items(scene, 1 / scale)
-    show_query_results(scene, tm_results)
-
+    result_scene = show_query_results(scene, tm_results)
     end_time = timeit.default_timer()
     print("used %f seconds" % (end_time - start_time))
+    return result_scene
+
+
+if __name__ == '__main__':
+    _main()

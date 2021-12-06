@@ -12,13 +12,20 @@ from recognizer_item import QueryItem
 
 
 def convert_template(image: ndarray) -> ndarray:
-    image = image.copy()
-    image = cv.cvtColor(image, cv.COLOR_BGR2HSV_FULL)
-    return cv.resize(image, None, fx=TM_SCALING_FACTOR, fy=TM_SCALING_FACTOR, interpolation=cv.INTER_CUBIC)
+    image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+    image = cv.resize(image, None,
+                      fx=TM_TEMPLATE_SCALING_FACTOR,
+                      fy=TM_TEMPLATE_SCALING_FACTOR,
+                      interpolation=cv.INTER_CUBIC)
+    return image
 
 
 def convert_template_mask(image_mask: ndarray) -> ndarray:
-    return cv.resize(image_mask, None, fx=TM_SCALING_FACTOR, fy=TM_SCALING_FACTOR, interpolation=cv.INTER_CUBIC)
+    image_mask = cv.resize(image_mask, None,
+                           fx=TM_TEMPLATE_SCALING_FACTOR,
+                           fy=TM_TEMPLATE_SCALING_FACTOR,
+                           interpolation=cv.INTER_CUBIC)
+    return image_mask
 
 
 def preprocess_items_template():
@@ -44,10 +51,13 @@ class TMResult:
 
 
 def query_item(item: QueryItem, screenshot_scaled: NDArray) -> list[TMResult]:
+    # Choose TM_CCOEFF instead of TM_SQDIFF & TM_CCORR, because the others don't punish wrong values.
     result: NDArray = cv.matchTemplate(screenshot_scaled,
                                        templ=item.template,
                                        mask=item.template_mask,
-                                       method=cv.TM_CCOEFF_NORMED)
+                                       method=cv.TM_CCORR_NORMED
+                                       )
+    result = np.where(np.isfinite(result), result, -1)
     tm_result_list = []
     size = np.array((item.template.shape[1], item.template.shape[0]))
     while True:
@@ -62,27 +72,25 @@ def query_item(item: QueryItem, screenshot_scaled: NDArray) -> list[TMResult]:
     return tm_result_list
 
 
-TM_THRESHOLD = 0.45
-TM_SCALING_FACTOR = 0.4
+TM_THRESHOLD = 0.875
+TM_TEMPLATE_SCALING_FACTOR = 1 / 3
 
 
-def query_items(screenshot: ndarray, scene_sf: float) -> list[TMResult]:
-    scene_sf *= TM_SCALING_FACTOR
+def query_items(screenshot: ndarray, factor: float) -> list[TMResult]:
+    factor *= TM_TEMPLATE_SCALING_FACTOR
     screenshot = screenshot.copy()
-    screenshot = cv.cvtColor(screenshot, cv.COLOR_BGR2HSV_FULL)
-    screenshot_scaled = cv.resize(screenshot, None,
-                                  fx=scene_sf,
-                                  fy=scene_sf,
-                                  interpolation=cv.INTER_CUBIC)
+    screenshot = cv.cvtColor(screenshot, cv.COLOR_BGR2HSV)
+    screenshot = cv.resize(screenshot, None, fx=factor, fy=factor, interpolation=cv.INTER_CUBIC)
+
     tm_results_all = []
     for item in ITEMS.values():
-        tm_results = query_item(item, screenshot_scaled)
+        tm_results = query_item(item, screenshot)
         tm_results_all.extend(tm_results)
         print(tm_results)
 
     for result in tm_results_all:
-        result.loc = np.rint(result.loc / scene_sf).astype(int)
-        result.size = np.rint(result.size / scene_sf).astype(int)
+        result.loc = np.rint(result.loc / factor).astype(int)
+        result.size = np.rint(result.size / factor).astype(int)
 
     tm_results_all.sort(key=lambda x: x.val, reverse=True)
     for i in range(0, len(tm_results_all)):
@@ -94,6 +102,7 @@ def query_items(screenshot: ndarray, scene_sf: float) -> list[TMResult]:
             if overlap(result_i, result_j):
                 result_j.val = math.nan
     tm_results_all = list(filter(lambda x: not math.isnan(x.val), tm_results_all))
+
     return tm_results_all
 
 

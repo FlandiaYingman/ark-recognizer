@@ -1,4 +1,3 @@
-import json
 from math import sqrt
 
 import cv2 as cv
@@ -21,13 +20,10 @@ def show_features(img, keypoints):
     cv.imshow(str(img), img_keypoints)
 
 
-
 def preprocess_items_feature():
     for item in ITEMS.values():
         if item.keypoints is None or item.descriptor is None:
             item.keypoints, item.descriptor = detect_features(item.image, item.image_mask)
-
-
 
 
 BF_MATCHER = cv.BFMatcher_create()
@@ -40,7 +36,7 @@ def match_item(item: QueryItem, scene_image, scene_keypoints, scene_descriptor):
     query_descriptor = item.descriptor
 
     matches = BF_MATCHER.knnMatch(query_descriptor, scene_descriptor, k=2)
-    good_matches = [m for m, n in matches if (m.distance / n.distance) < 0.75]
+    good_matches = [m for m, n in matches if (m.distance / n.distance) < 0.70]
     if len(good_matches) < MIN_MATCH_COUNT:
         print("%s: no enough good matches, required %d but was %d" % (item, MIN_MATCH_COUNT, len(good_matches)))
         return -1
