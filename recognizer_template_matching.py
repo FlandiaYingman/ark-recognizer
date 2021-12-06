@@ -86,12 +86,13 @@ def query_items(screenshot: ndarray, scene_sf: float) -> list[TMResult]:
 
     tm_results_all.sort(key=lambda x: x.val, reverse=True)
     for i in range(0, len(tm_results_all)):
+        result_i = tm_results_all[i]
         for j in range(i + 1, len(tm_results_all)):
-            result_i = tm_results_all[i]
             result_j = tm_results_all[j]
+            if math.isnan(result_j.val):
+                continue
             if overlap(result_i, result_j):
-                result_min = min(result_i, result_j, key=lambda x: x.val)
-                result_min.val = math.nan
+                result_j.val = math.nan
     tm_results_all = list(filter(lambda x: not math.isnan(x.val), tm_results_all))
     return tm_results_all
 
