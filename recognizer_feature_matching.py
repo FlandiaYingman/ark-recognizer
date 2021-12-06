@@ -4,12 +4,15 @@ from math import sqrt
 import cv2 as cv
 import numpy as np
 
+from recognizer_item import ITEMS
+from recognizer_item import QueryItem
+
 SIFT = cv.SIFT_create()
 
 
 def detect_features(img, mask=None):
     global SIFT
-    keypoints, descriptor = SIFT.detectAndCompute(img, mask, None)
+    keypoints, descriptor = SIFT.detectAndCompute(img, mask=mask)
     return keypoints, descriptor
 
 
@@ -18,41 +21,17 @@ def show_features(img, keypoints):
     cv.imshow(str(img), img_keypoints)
 
 
-def extract_alpha_mask(img):
-    retval, mask = cv.threshold(img[:, :, 3], 0, 255, cv.THRESH_BINARY)
-    return mask
+
+def preprocess_items_feature():
+    for item in ITEMS.values():
+        if item.keypoints is None or item.descriptor is None:
+            item.keypoints, item.descriptor = detect_features(item.image, item.image_mask)
 
 
-class QueryItem:
-
-    def __init__(self, item_id, item_name, image):
-        self.item_id = item_id
-        self.item_name = item_name
-        self.image = image
-        self.mask = extract_alpha_mask(image)
-        self.keypoints, self.descriptor = detect_features(self.image, self.mask)
-
-    def __str__(self):
-        return "%s(%s)" % (self.item_name, self.item_id)
-
-    def show(self):
-        show_features(self.image, self.keypoints)
-
-
-ITEMS = {}
-
-
-def load_items():
-    global ITEMS
-    with open("items/data/items.json", "r") as item_data_file:
-        item_data = json.load(item_data_file)
-    for i in item_data:
-        image = cv.imread("items/icon/%s.png" % i["id"], cv.IMREAD_UNCHANGED)
-        ITEMS[i["id"]] = QueryItem(i["id"], i["name"], image)
 
 
 BF_MATCHER = cv.BFMatcher_create()
-MIN_MATCH_COUNT = 10
+MIN_MATCH_COUNT = 8
 
 
 def match_item(item: QueryItem, scene_image, scene_keypoints, scene_descriptor):
@@ -89,7 +68,7 @@ def match_item(item: QueryItem, scene_image, scene_keypoints, scene_descriptor):
     x, y, w, h = cv.boundingRect(match_rect)
     scene_h, scene_w, _ = scene_image.shape
 
-    if x < 0 or y < 0 or x+w > scene_w or y+h > scene_h:
+    if x < 0 or y < 0 or x + w > scene_w or y + h > scene_h:
         print("%s: transformation invalid (out of bounds) with %d good matches" % (item, len(good_matches)))
         return -1
 
