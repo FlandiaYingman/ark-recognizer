@@ -54,7 +54,7 @@ def match_items(scene_image):
     scales = np.array(scales)
     scales = scales[np.where(scales.mean() + scales.std() / 3 > scales)]
     scales = scales[np.where(scales.mean() - scales.std() / 3 < scales)]
-    return scales.mean()
+    return np.median(scales)
 
 
 def show_query_results(scene: ndarray, query_results: list[TMResult]):
@@ -70,11 +70,24 @@ def show_query_results(scene: ndarray, query_results: list[TMResult]):
     return scene_copy
 
 
+def recognize(scene):
+    start_time = timeit.default_timer()
+
+    scale = match_items(scene)
+    print("scale factor: %f" % scale)
+    tm_results = query_items(scene, 1 / scale)
+    result_scene = show_query_results(scene, tm_results)
+
+    end_time = timeit.default_timer()
+    print("used %f seconds" % (end_time - start_time))
+    return result_scene
+
+
 def _main():
-    scene_0 = cv.imread("test/screenshots/0_1080.png", cv.IMREAD_COLOR)
-    scene_1 = cv.imread("test/screenshots/1_1080.png", cv.IMREAD_COLOR)
-    scene_2 = cv.imread("test/screenshots/2_1080.png", cv.IMREAD_COLOR)
-    scene_3 = cv.imread("test/screenshots/3_1080.png", cv.IMREAD_COLOR)
+    scene_0 = cv.imread("test/scene_images/screenshot_0_0.5x.jpg", cv.IMREAD_COLOR)
+    scene_1 = cv.imread("test/scene_images/screenshot_1.jpg", cv.IMREAD_COLOR)
+    scene_2 = cv.imread("test/scene_images/screenshot_1.PNG", cv.IMREAD_COLOR)
+    scene_3 = cv.imread("test/scene_images/screenshot_0_1x.jpg", cv.IMREAD_COLOR)
 
     load_items()
     preprocess_items_feature()
@@ -90,17 +103,6 @@ def _main():
     cv.imshow("result_scene_2", result_scene_2)
     cv.imshow("result_scene_3", result_scene_3)
     cv.waitKey()
-
-
-def recognize(scene):
-    start_time = timeit.default_timer()
-    scale = match_items(scene)
-    print("scale factor: %f" % scale)
-    tm_results = query_items(scene, 1 / scale)
-    result_scene = show_query_results(scene, tm_results)
-    end_time = timeit.default_timer()
-    print("used %f seconds" % (end_time - start_time))
-    return result_scene
 
 
 if __name__ == '__main__':
