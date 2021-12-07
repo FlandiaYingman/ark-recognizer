@@ -4,23 +4,17 @@ A recognizer to recognize items of *Arknights* screenshots.
 
 ## Principle
 
-This project uses *OpenCV* to deal with image processing.
+1. 对场景图像和模板图像进行 HoughCircles，获取场景与模板图像大小之比。
+2. 将场景图像缩放到模板图像大小，并将场景图像和模板图像共同缩放一个固定的 factor。
+3. 进行模板匹配。
 
-### Preprocess: Load Items
-
-Firstly, the recognizer loads the icons and data of the items. Read [Update `Items`](items/update_items.md) to obtain
-more information about items icons and data.
-
-It simply loads the ID, the name, and the icon image of each item.
-
-Then, the recognizer is ready to recognize any *Arknights* screenshots.
-
-### First Round: Feature Matching
-
-In this round, the recognizer detects the keypoints and descriptor (i.e. features) of all items and the screenshot. For
-each item, the recognizer matches its features with the screenshot's. If there are good matches, the recognizer computes
-the perspective transformation from the item to screenshot, otherwise, the recognizer assumes the item is absent.
-Therefore, the recognizer will know where's the item is in the screenshot.
-
-Currently, the feature detection algorithm is *SIFT*, and the matcher algorithm is *Brute-Force*.
-
+| Width (Ratio) 	| Height (Ratio) 	| Aspect Ratio 	|  Width   (Pixel) 	| Height (Pixel) 	| Icon Diameter 	|
+|---------------	|----------------	|--------------	|------------------	|----------------	|---------------	|
+| 1             	| 1              	| 1.00         	| 1080             	| 1080           	| N/A              	|
+| 5             	| 4              	| 1.25         	| 1350             	| 1080           	| 135           	|
+| 4             	| 3              	| 1.33         	| 1440             	| 1080           	| 144           	|
+| 3             	| 2              	| 1.50         	| 1620             	| 1080           	| 162           	|
+| 16            	| 10             	| 1.60         	| 1728             	| 1080           	| 172           	|
+| 16            	| 9              	| 1.78         	| 1920             	| 1080           	| 192           	|
+| 2             	| 1              	| 2.00         	| 2160             	| 1080           	| 191           	|
+| 21            	| 9              	| 2.33         	| 2520             	| 1080           	| 191           	|
