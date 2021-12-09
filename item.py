@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+from typing import Dict
 
 import cv2 as cv
 from numpy.typing import NDArray
@@ -10,7 +11,7 @@ class Item:
     """
     Represents an item in Arknights. Items have their own item IDs and icons.
     """
-    item_id: int
+    item_id: str
     item_name: str
     item_icon: NDArray
 
@@ -21,41 +22,31 @@ class Item:
         return self.__str__()
 
 
+def load_item_name_id_dict():
+    with open("items/data/item_table.json", "r") as item_data_file:
+        item_data = json.load(item_data_file)
+    dict_name_id = {}
+    for item_obj in item_data['items'].values():
+        item_id = item_obj["itemId"]
+        item_name = item_obj["name"]
+        dict_name_id[item_name] = item_id
+    return dict_name_id
+
+
+ITEM_DICT_NAME_ID: Dict[str, str] = load_item_name_id_dict()
+
+
 def load_items():
     with open("items/data/items.json", "r") as item_data_file:
         item_data = json.load(item_data_file)
     items = []
     for item_obj in item_data:
-        item_id = int(item_obj["id"])
         item_name = item_obj["name"]
-        items.append(load_item(item_id, item_name))
+        item_id = ITEM_DICT_NAME_ID[item_name]
+        image_id = item_obj["id"]
+        image = cv.imread("items/icon/%s.png" % image_id, cv.IMREAD_UNCHANGED)
+        items.append(Item(item_id, item_name, image))
     return items
 
 
-def load_item(item_id, item_name):
-    image = cv.imread("items/icon/%s.png" % item_id, cv.IMREAD_UNCHANGED)
-    return Item(item_id, item_name, image)
-
-
 ITEMS: list[Item] = load_items()
-
-
-class QueryResult:
-
-    def __init__(self, item, locs, vals, size):
-        self.item = item
-        self.locs = locs
-        self.vals = vals
-        self.size = size
-
-    def __str__(self):
-        return "Query Result %s: %s, %s, %f" % (self.item, self.locs, self.vals, self.size)
-
-    def pt1(self):
-        return self.loc
-
-    def pt2(self):
-        return (self.loc[0] + self.size[0], self.loc[1] + self.size[1])
-
-
-QueryResults = dict[str, QueryResult]

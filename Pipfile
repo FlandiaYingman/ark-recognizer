@@ -9,6 +9,7 @@ pillow = "*"
 opencv-python = "*"
 matplotlib = "*"
 opencv-contrib-python = "*"
+imagehash = "*"
 
 [dev-packages]
 

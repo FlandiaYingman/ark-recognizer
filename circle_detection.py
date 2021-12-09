@@ -5,9 +5,8 @@ import cv2
 import numpy as np
 from numpy.typing import NDArray
 
-# noinspection PyUnresolvedReferences
-import utils
 from item import ITEMS
+from utils import img_size
 
 ITEM_ICON_SIZE = 183
 ITEM_ICON_OUT_CIRCLE_RADIUS = 163 / 2
@@ -43,7 +42,7 @@ def _preprocess_items_radius():
     return items_cd
 
 
-ITEMS_RADIUS: Dict[int, float] = _preprocess_items_radius()
+ITEMS_RADIUS: Dict[str, float] = _preprocess_items_radius()
 ITEMS_CD_RADIUS: float = np.array(list(ITEMS_RADIUS.values())).mean()
 
 
@@ -61,7 +60,7 @@ def estimate_circle_radius(size: NDArray):
 def detect_circle(scene_image):
     scene_image = cv2.cvtColor(scene_image, cv2.COLOR_BGR2GRAY)
 
-    estimate = estimate_circle_radius(numpy_util.img_size(scene_image))
+    estimate = estimate_circle_radius(img_size(scene_image))
     estimate_low = round(estimate * 0.9)
     estimate_high = round(estimate * 1.1)
     circles = cv2.HoughCircles(scene_image,

@@ -28,6 +28,11 @@ class TMResult:
     def pt2(self):
         return self.loc + self.size
 
+    def crop(self, scene_image: NDArray):
+        x_begin, y_begin = self.loc
+        x_end, y_end = self.loc + self.size
+        return scene_image[y_begin:y_end, x_begin:x_end, :]
+
 
 TM_TEMPLATE_SCALE = 1 / 3
 TM_THRESHOLD = 0.6
@@ -59,8 +64,8 @@ def _preprocess_items_templates_mask():
     return items_template_mask
 
 
-ITEMS_TEMPLATE: dict[int, NDArray] = _preprocess_items_template()
-ITEMS_TEMPLATE_MASK: dict[int, NDArray] = _preprocess_items_templates_mask()
+ITEMS_TEMPLATE: dict[str, NDArray] = _preprocess_items_template()
+ITEMS_TEMPLATE_MASK: dict[str, NDArray] = _preprocess_items_templates_mask()
 
 
 def match_item(scene: NDArray, circle: CDResult, item: Item) -> TMResult | None:
@@ -113,7 +118,6 @@ def match_items(scene: NDArray, circle: CDResult) -> TMResult | None:
         return None
     results.sort(key=lambda x: x.val, reverse=True)
     result = results[0]
-    print(result)
     if result.val >= TM_THRESHOLD:
         return result
     else:
