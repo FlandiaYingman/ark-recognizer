@@ -15,11 +15,11 @@ DIR = "test_images/scene_images"
 
 
 def results_to_dict(r: List[RecognizeResult]):
-    return {i.item.item_name: i.quantity for i in r}
+    return {i.item.item_name: i.number for i in r}
 
 
 def dict_to_results(d: Dict[str, int]):
-    return [RecognizeResult(next(x for x in ITEMS if x.item_name == item_name), quantity) for item_name, quantity in d]
+    return [RecognizeResult(next(x for x in ITEMS if x.item_name == item_name), number) for item_name, number in d]
 
 
 class Case1920x1080(unittest.TestCase):

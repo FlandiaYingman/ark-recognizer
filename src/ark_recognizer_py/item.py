@@ -22,7 +22,7 @@ class Item:
         return self.__str__()
 
 
-def load_item_name_id_dict():
+def __load_item_name_id_dict():
     with open("items/data/item_table.json", "r") as item_data_file:
         item_data = json.load(item_data_file)
     dict_name_id = {}
@@ -33,20 +33,18 @@ def load_item_name_id_dict():
     return dict_name_id
 
 
-ITEM_DICT_NAME_ID: Dict[str, str] = load_item_name_id_dict()
-
-
-def load_items():
+def __load_items():
     with open("items/data/item_icon_table.json", "r") as item_data_file:
         item_data = json.load(item_data_file)
     items = []
     for item_obj in item_data:
         item_name = item_obj["name"]
-        item_id = ITEM_DICT_NAME_ID[item_name]
+        item_id = ITEMS_NAME_ID[item_name]
         image_id = item_obj["id"]
         image = cv.imread("items/icon/%s.png" % image_id, cv.IMREAD_UNCHANGED)
         items.append(Item(item_id, item_name, image))
     return items
 
 
-ITEMS: list[Item] = load_items()
+ITEMS_NAME_ID: Dict[str, str] = __load_item_name_id_dict()
+ITEMS: list[Item] = __load_items()
