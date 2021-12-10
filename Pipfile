@@ -6,10 +6,8 @@ name = "pypi"
 [packages]
 numpy = "*"
 pillow = "*"
-opencv-python = "*"
-matplotlib = "*"
-opencv-contrib-python = "*"
 imagehash = "*"
+opencv-python = "*"
 
 [dev-packages]
 

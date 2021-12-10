@@ -37,7 +37,7 @@ ITEM_DICT_NAME_ID: Dict[str, str] = load_item_name_id_dict()
 
 
 def load_items():
-    with open("items/data/items.json", "r") as item_data_file:
+    with open("items/data/item_icon_table.json", "r") as item_data_file:
         item_data = json.load(item_data_file)
     items = []
     for item_obj in item_data:

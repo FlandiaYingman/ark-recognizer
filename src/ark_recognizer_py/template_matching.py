@@ -4,12 +4,12 @@ import cv2 as cv
 import numpy as np
 from numpy.typing import NDArray
 
-from circle_detection import CDResult
-from circle_detection import ITEM_ICON_OUT_CIRCLE_RADIUS
-from item import ITEMS
-from item import Item
-from utils import clamp
-from utils import img_size
+from ark_recognizer_py.circle_detection import CDResult
+from ark_recognizer_py.circle_detection import ITEM_ICON_OUT_CIRCLE_RADIUS
+from ark_recognizer_py.item import ITEMS
+from ark_recognizer_py.item import Item
+from ark_recognizer_py.utils import clamp
+from ark_recognizer_py.utils import img_size
 
 
 @dataclass

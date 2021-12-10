@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 from numpy.typing import NDArray
 
-from item import ITEMS
-from utils import img_size
+from ark_recognizer_py.item import ITEMS
+from ark_recognizer_py.utils import img_size
 
 ITEM_ICON_SIZE = 183
 ITEM_ICON_OUT_CIRCLE_RADIUS = 163 / 2

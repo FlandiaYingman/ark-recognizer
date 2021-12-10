@@ -11,8 +11,8 @@ from PIL import ImageFont
 from imagehash import ImageHash
 from numpy.typing import NDArray
 
-from item import Item
-from template_matching import TMResult
+from ark_recognizer_py.item import Item
+from ark_recognizer_py.template_matching import TMResult
 
 """
 When the template size is 216x216 pixels:
@@ -75,16 +75,6 @@ def hash_image(image: NDArray):
     return image_hash
 
 
-def round_odd(n):
-    answer = round(n)
-    if answer % 2 == 1:
-        return answer
-    if abs(answer + 1 - n) < abs(answer - 1 - n):
-        return answer + 1
-    else:
-        return answer - 1
-
-
 def crop_text_region(img_match):
     x, y = TEXT_REGION_POS
     w, h = TEXT_REGION_SIZE
@@ -97,7 +87,7 @@ NUMBERS = "0123456789"
 def draw_digits():
     estimate_font_size = 1
     while True:
-        font = ImageFont.truetype("train_fonts/NotoSansSC-Regular.otf", estimate_font_size)
+        font = ImageFont.truetype("fonts/NotoSansSC-Regular.otf", estimate_font_size)
         l, t, r, b = font.getbbox(NUMBERS)
         if b - t >= TEXT_HEIGHT:
             break
@@ -120,8 +110,7 @@ def preprocess_digits_hash():
     digits_image = draw_digits()
     for digit_image in find_digits(digits_image):
         digits_hash.append(hash_image(digit_image))
-    if len(digits_hash) != 10:
-        raise RuntimeError
+    assert len(digits_hash) == 10
     return digits_hash
 
 
