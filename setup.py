@@ -4,7 +4,7 @@ import setuptools
 
 setuptools.setup(
     name="ark-recognizer-py",
-    version="0.0.0",
+    version="1.0.0",
     author="Flandia Yingman",
     author_email="Flandia_YingM@hotmail.com",
     description="Recognizes the type and number of items from Arknights screenshots.",
