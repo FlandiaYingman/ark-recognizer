@@ -9,6 +9,7 @@
 #include <fstream>
 #include <opencv2/imgproc.hpp>
 #include "recognize_icon.h"
+#include "recognizer_type.h"
 
 using namespace std;
 using namespace cv;
@@ -34,6 +35,21 @@ void draw_ir_results(Mat &scene_canvas, const vector<IRResult> &ir_results) {
     }
 }
 
+void draw_tr_results(Mat &scene_canvas, const vector<TRResult> &tr_results) {
+    for (const auto &tr_result: tr_results) {
+        rectangle(scene_canvas,
+                  tr_result.loc,
+                  Size(tr_result.loc) + tr_result.size,
+                  Scalar(255.0, 0.0, 0.0));
+        putText(scene_canvas,
+                tr_result.item.item_id,
+                tr_result.loc,
+                FONT_HERSHEY_DUPLEX,
+                1.0,
+                Scalar(255.0, 0.0, 0.0));
+    }
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc <= 1) {
@@ -51,14 +67,21 @@ int main(int argc, char *argv[]) {
     for (auto &item: items) std::cout << item.to_string() << ", ";
     std::cout << "\n\n";
 
+    const auto item_templates = preprocess_item_templates(items);
+    const auto item_template_masks = preprocess_item_template_masks(items);
+
     for (const auto &item: filenames) {
         auto scene_image = cv::imread(item);
         auto ir_results = recognize_icon(scene_image);
+        auto tr_results = recognize_type(scene_image, ir_results, items, item_templates, item_template_masks);
 
         auto scene_canvas = scene_image.clone();
         draw_ir_results(scene_canvas, ir_results);
-
         imshow("ir_results", scene_canvas);
+
+        draw_tr_results(scene_canvas, tr_results);
+        imshow("tr_results", scene_canvas);
+
         waitKey();
     }
 
