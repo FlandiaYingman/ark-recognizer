@@ -2,8 +2,8 @@
 // Created by Flandia on 2021/12/12.
 //
 
-#ifndef ARK_RECOGNIZER_CPP_RECOGNIZER_TYPE_H
-#define ARK_RECOGNIZER_CPP_RECOGNIZER_TYPE_H
+#ifndef ARK_RECOGNIZER_CPP_RECOGNIZE_TYPE_H
+#define ARK_RECOGNIZER_CPP_RECOGNIZE_TYPE_H
 
 #include "item.h"
 #include "recognize_icon.h"
@@ -34,4 +34,4 @@ std::vector<TRResult> recognize_type(const cv::Mat &scene_image,
                                      const std::map<std::string, cv::Mat> &templates,
                                      const std::map<std::string, cv::Mat> &masks);
 
-#endif //ARK_RECOGNIZER_CPP_RECOGNIZER_TYPE_H
+#endif //ARK_RECOGNIZER_CPP_RECOGNIZE_TYPE_H

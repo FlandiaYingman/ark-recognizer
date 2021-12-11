@@ -16,6 +16,6 @@ find_package(nlohmann_json CONFIG REQUIRED)
 hunter_add_package(OpenCV)
 find_package(OpenCV REQUIRED)
 
-add_executable(recognizer src/ark_recognizer_cpp/recognizer.cpp src/ark_recognizer_cpp/item.h src/ark_recognizer_cpp/item.cpp src/ark_recognizer_cpp/recognize_icon.cpp src/ark_recognizer_cpp/recognize_icon.h src/ark_recognizer_cpp/recognizer_type.cpp src/ark_recognizer_cpp/recognizer_type.h)
+add_executable(recognizer src/ark_recognizer_cpp/recognizer.cpp src/ark_recognizer_cpp/item.h src/ark_recognizer_cpp/item.cpp src/ark_recognizer_cpp/recognize_icon.cpp src/ark_recognizer_cpp/recognize_icon.h src/ark_recognizer_cpp/recognize_type.cpp src/ark_recognizer_cpp/recognize_type.h)
 target_link_libraries(recognizer PUBLIC nlohmann_json::nlohmann_json)
 target_link_libraries(recognizer PRIVATE ${OpenCV_LIBS})

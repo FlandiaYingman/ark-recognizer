@@ -3,7 +3,7 @@
 //
 
 #include <opencv2/imgproc.hpp>
-#include "recognizer_type.h"
+#include "recognize_type.h"
 
 using namespace std;
 using namespace cv;
