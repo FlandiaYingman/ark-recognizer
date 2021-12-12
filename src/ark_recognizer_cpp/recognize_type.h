@@ -24,9 +24,7 @@ const double TM_THRESHOLD = 0.6;
 const double TEMPL_ICON_SIDE_LENGTH = 183;
 const double TEMPL_CIRCLE_RADIUS = 163.0 / 2.0;
 
-std::map<std::string, cv::Mat> preprocess_item_templates(const std::vector<Item> &items);
-
-std::map<std::string, cv::Mat> preprocess_item_template_masks(const std::vector<Item> &items);
+std::tuple<cv::Mat, cv::Mat> transform_icon_templ(const cv::Mat &icon);
 
 std::vector<TRResult> recognize_type(const cv::Mat &scene_image,
                                      const std::vector<IRResult> &ir_results,

@@ -32,7 +32,7 @@ std::vector<FullItem> load_full_items(istream &in) {
 std::vector<Item> load_items(istream &in, const vector<FullItem> &full_items) {
     json json_obj;
 
-//    ifstream in("items/data/item_icon_table.json");
+//    ifstream in("ITEMS/data/item_icon_table.json");
     in >> json_obj;
 
     vector<Item> items;

@@ -31,11 +31,16 @@ const cv::Size NUMBER_REGION_SIZE(92, 44); // NOLINT(cert-err58-cpp)
 //const int BORDER_SIZE = 9;
 
 
-std::array<hash_t, 10> load_digit_hashes(std::istream &in);
+std::array<std::string, 10> load_digit_hashes(std::istream &in);
 
 
 std::vector<NRResult> recognize_number(const cv::Mat &scene_image,
                                        const std::vector<TRResult> &tr_results,
-                                       const std::array<hash_t, 10> &digit_hashes);
+                                       const std::map<std::string, std::string> &hash_map);
+
+
+hash_t hex2hash(const std::string &hex);
+
+std::string hash2hex(const hash_t &hash);
 
 #endif //ARK_RECOGNIZER_CPP_RECOGNIZE_NUMBER_H

@@ -8,29 +8,20 @@
 using namespace std;
 using namespace cv;
 
-std::map<std::string, cv::Mat> preprocess_item_templates(const std::vector<Item> &items) {
-    map<string, Mat> templs;
-    for (const auto &item: items) {
-        auto templ = item.item_icon.clone();
-        cvtColor(templ, templ, COLOR_BGRA2BGR);
-        resize(templ, templ, Size(), TM_SCALE, TM_SCALE, INTER_CUBIC);
-        templs[item.item_id] = templ;
-    }
-    return templs;
-}
+std::tuple<cv::Mat, cv::Mat> transform_icon_templ(const cv::Mat &icon) {
+    Mat templ = icon.clone();
+    resize(templ, templ, Size(), TM_SCALE, TM_SCALE, INTER_AREA);
 
-std::map<std::string, cv::Mat> preprocess_item_template_masks(const std::vector<Item> &items) {
-    map<string, Mat> masks;
-    for (const auto &item: items) {
-        vector<cv::Mat> channels;
-        cv::split(item.item_icon.clone(), channels);
+    vector<Mat> templ_channels;
+    split(templ, templ_channels);
 
-        auto mask = channels[3];
-        threshold(mask, mask, 170, 255, THRESH_BINARY);
-        resize(mask, mask, Size(), TM_SCALE, TM_SCALE, INTER_CUBIC);
-        masks[item.item_id] = mask;
-    }
-    return masks;
+    Mat templ_without_alpha;
+    Mat templ_alpha;
+    templ_alpha = *(templ_channels.begin() + 3);
+    threshold(templ_alpha, templ_alpha, 170, 255, THRESH_BINARY);
+    cvtColor(templ, templ_without_alpha, COLOR_BGRA2BGR);
+
+    return {templ_without_alpha, templ_alpha};
 }
 
 TRResult match_item_template(const Mat &icon_image,
