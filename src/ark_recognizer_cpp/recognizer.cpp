@@ -10,6 +10,8 @@
 #include <opencv2/imgproc.hpp>
 #include "recognize_icon.h"
 #include "recognize_type.h"
+#include "recognize_number.h"
+
 
 using namespace std;
 using namespace cv;
@@ -24,6 +26,12 @@ std::vector<Item> load_items_from_file(const std::vector<FullItem> &full_items) 
     std::ifstream iis("items/data/item_icon_table.json");
     auto items = load_items(iis, full_items);
     return items;
+}
+
+std::array<hash_t, 10> load_digit_hashes_from_file() {
+    std::ifstream in("fonts/NotoSansSC-Regular_DigitHash.json");
+    auto digit_hashes = load_digit_hashes(in);
+    return digit_hashes;
 }
 
 
@@ -50,6 +58,13 @@ void draw_tr_results(Mat &scene_canvas, const vector<TRResult> &tr_results) {
     }
 }
 
+void draw_nr_results(Mat &scene_canvas, const vector<NRResult> &nr_results) {
+    for (const auto &nr_result: nr_results) {
+        rectangle(scene_canvas, Rect(nr_result.loc, nr_result.size), Scalar(0, 0, 255));
+        putText(scene_canvas, to_string(nr_result.number), nr_result.loc, FONT_HERSHEY_DUPLEX, 1.0, Scalar(0, 0, 255));
+    }
+}
+
 
 int main(int argc, char *argv[]) {
     if (argc <= 1) {
@@ -69,11 +84,19 @@ int main(int argc, char *argv[]) {
 
     const auto item_templates = preprocess_item_templates(items);
     const auto item_template_masks = preprocess_item_template_masks(items);
+    const auto digit_hashes = load_digit_hashes_from_file();
 
     for (const auto &item: filenames) {
+        auto begin = chrono::steady_clock::now();
+
         auto scene_image = cv::imread(item);
         auto ir_results = recognize_icon(scene_image);
         auto tr_results = recognize_type(scene_image, ir_results, items, item_templates, item_template_masks);
+        auto nr_results = recognize_number(scene_image, tr_results, digit_hashes);
+
+        auto end = chrono::steady_clock::now();
+
+        cout << "used " << chrono::duration_cast<chrono::milliseconds>(end - begin).count() << " ms" << endl;
 
         auto scene_canvas = scene_image.clone();
         draw_ir_results(scene_canvas, ir_results);
@@ -81,6 +104,9 @@ int main(int argc, char *argv[]) {
 
         draw_tr_results(scene_canvas, tr_results);
         imshow("tr_results", scene_canvas);
+
+        draw_nr_results(scene_canvas, nr_results);
+        imshow("nr_results", scene_canvas);
 
         waitKey();
     }
