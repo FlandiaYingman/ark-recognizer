@@ -5,7 +5,6 @@
 #include "item.h"
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
 #include <fstream>
 #include <opencv2/imgproc.hpp>
 #include "recognize_icon.h"
@@ -172,7 +171,7 @@ vector<RecognizeResult> recognize(const vector<string> &filenames) {
 //        draw_nr_results(scene_canvas, nr_results);
 //        imshow("nr_results", scene_canvas);
 
-        waitKey();
+//        waitKey();
     }
     vector<RecognizeResult> result = merge_to_recognize_result(recognize_results);
 
