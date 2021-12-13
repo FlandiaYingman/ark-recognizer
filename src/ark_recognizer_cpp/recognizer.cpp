@@ -11,11 +11,12 @@
 #include "recognize_icon.h"
 #include "recognize_type.h"
 #include "recognize_number.h"
+#include <nlohmann/json.hpp>
 
 
 using namespace std;
 using namespace cv;
-
+using namespace nlohmann;
 
 void draw_ir_results(Mat &scene_canvas, const vector<IRResult> &ir_results) {
     for (const auto &result: ir_results) {
@@ -54,8 +55,12 @@ public:
     int number = -1;
 };
 
-
-vector<RecognizeResult> recognize(const vector<string> &filenames);
+void to_json(json &j, const RecognizeResult &o) {
+    j = json{
+            {"id",   o.item.item_id},
+            {"have", o.number},
+    };
+}
 
 static vector<Item> ITEMS;
 static map<string, Mat> TEMPL_MAP; // NOLINT(cert-err58-cpp)
@@ -136,19 +141,24 @@ vector<RecognizeResult> merge_to_recognize_result(vector<vector<RecognizeResult>
     return result_vector;
 }
 
+vector<RecognizeResult> recognize_one(const Mat &scene_image) {
+    auto ir_results = recognize_icon(scene_image);
+    auto tr_results = recognize_type(scene_image, ir_results, ITEMS, TEMPL_MAP, MASK_MAP);
+    auto nr_results = recognize_number(scene_image, tr_results, HASH_MAP);
+    vector<RecognizeResult> scene_results;
+    transform(nr_results.begin(), nr_results.end(),
+              back_inserter(scene_results),
+              [](NRResult &nr_result) { return RecognizeResult{nr_result.item, nr_result.number}; });
+    return scene_results;
+}
+
 vector<RecognizeResult> recognize(const vector<string> &filenames) {
     vector<vector<RecognizeResult>> recognize_results;
     for (const auto &filename: filenames) {
         auto begin = chrono::steady_clock::now();
 
         auto scene_image = imread(filename);
-        auto ir_results = recognize_icon(scene_image);
-        auto tr_results = recognize_type(scene_image, ir_results, ITEMS, TEMPL_MAP, MASK_MAP);
-        auto nr_results = recognize_number(scene_image, tr_results, HASH_MAP);
-
-        vector<RecognizeResult> scene_results;
-        transform(nr_results.begin(), nr_results.end(), back_inserter(scene_results),
-                  [](NRResult &nr_result) { return RecognizeResult{nr_result.item, nr_result.number}; });
+        auto scene_results = recognize_one(scene_image);
         recognize_results.push_back(scene_results);
 
         auto end = chrono::steady_clock::now();
@@ -167,6 +177,45 @@ vector<RecognizeResult> recognize(const vector<string> &filenames) {
     vector<RecognizeResult> result = merge_to_recognize_result(recognize_results);
 
     return result;
+}
+
+string export_penguin_arkplanner_json(vector<RecognizeResult> &merged_results) {
+    json json_obj = json::object();
+    json_obj["@type"] = "@penguin-statistics/planner/config";
+    json_obj["items"] = json::array();
+
+    for (const auto &item: merged_results) {
+        json_obj["items"].push_back(json(item));
+    }
+
+    auto json_str = to_string(json_obj);
+    return json_str;
+}
+
+
+extern "C" char *recognize(const uint8_t **scene_images_data,
+                           const size_t *scene_images_data_length,
+                           size_t scene_image_length) {
+    vector<vector<RecognizeResult>> recognize_results;
+    for (size_t i = 0; i < scene_image_length; ++i) {
+        auto scene_image_data = scene_images_data[i];
+        auto scene_image_data_length = scene_images_data_length[i];
+
+        auto scene_image_vector = vector<uint8_t>(scene_image_data, scene_image_data + scene_image_data_length);
+        auto scene_image = imdecode(scene_image_vector, IMREAD_COLOR);
+        auto result = recognize_one(scene_image);
+        recognize_results.push_back(result);
+    }
+    auto merged_results = merge_to_recognize_result(recognize_results);
+
+    auto json_str = export_penguin_arkplanner_json(merged_results);
+    auto json_str_len = strlen(json_str.c_str());
+
+    auto json_c_str = new char[json_str_len + 1];
+    strcpy_s(json_c_str, json_str_len + 1, json_str.c_str());
+
+    // note: if calling this function as WASM function, Emscripten free the memory itself.
+    return json_c_str;
 }
 
 
