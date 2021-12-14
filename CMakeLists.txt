@@ -43,9 +43,8 @@ endif (NOT WASM)
 
 
 set(SOURCES
-        src/ark_recognizer_cpp/recognizer.cpp
         src/ark_recognizer_cpp/item.h
-        src/ark_recognizer_cpp/item.cpp
+        src/ark_recognizer_cpp/recognizer.cpp
         src/ark_recognizer_cpp/recognize_icon.cpp
         src/ark_recognizer_cpp/recognize_icon.h
         src/ark_recognizer_cpp/recognize_type.cpp
@@ -54,9 +53,11 @@ set(SOURCES
         src/ark_recognizer_cpp/recognize_number.h
         src/ark_recognizer_cpp/utils.h
         src/ark_recognizer_cpp/utils.cpp
+        src/ark_recognizer_cpp/recognizer.h
         )
 
-add_executable(recognizer ${SOURCES})
+add_executable(recognizer ${SOURCES} src/ark_recognizer_cpp/main.cpp)
+add_executable(recognizer_wasm ${SOURCES} src/ark_recognizer_cpp/recognizer_wasm.cpp)
 
 if (WASM)
     if (NOT EXISTS ${OpenCV_DIR})
@@ -85,18 +86,21 @@ if (WASM)
     endif ()
 
 
-    target_include_directories(recognizer PRIVATE ${OpenCV_DIR}/include/opencv4/)
-    target_include_directories(recognizer PRIVATE ${nlohmann_json_DIR}/include)
+    target_include_directories(recognizer_wasm PRIVATE ${OpenCV_DIR}/include/opencv4/)
+    target_include_directories(recognizer_wasm PRIVATE ${nlohmann_json_DIR}/include)
 
     # Link to opencv.js precompiled libraries
     file(GLOB OpenCV_LIBS ${OpenCV_DIR}/lib/*.a)
-    target_link_libraries(recognizer ${OpenCV_LIBS})
-
+    target_link_libraries(recognizer_wasm ${OpenCV_LIBS})
     file(GLOB OpenCV_3RD_LIBS ${OpenCV_DIR}/lib/opencv4/3rdparty/*.a)
-    target_link_libraries(recognizer ${OpenCV_3RD_LIBS})
+    target_link_libraries(recognizer_wasm ${OpenCV_3RD_LIBS})
 
-    target_link_options(recognizer PRIVATE "-s EXPORTED_FUNCTIONS='[_recognize, _load_item, _load_hash]'")
+    target_link_options(recognizer_wasm PRIVATE "-s EXPORTED_FUNCTIONS='[_load_item, _load_hash, _recognize_to_arkplanner_json]'")
 else ()
     target_link_libraries(recognizer PUBLIC nlohmann_json::nlohmann_json)
     target_link_libraries(recognizer PRIVATE ${OpenCV_LIBS})
+
+    # for compatible use only. do not compile recognizer_wasm in non-emscripten environment!
+    target_link_libraries(recognizer_wasm PUBLIC nlohmann_json::nlohmann_json)
+    target_link_libraries(recognizer_wasm PRIVATE ${OpenCV_LIBS})
 endif ()
